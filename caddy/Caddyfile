@@ -54,25 +54,30 @@
 		header_up Host {upstream_hostport}
 	}
 
-	handle /mqtt /mqtt/* {
-		reverse_proxy {
-			# for private networking replicas are exposed as multiple dns results, use those dns results as the upstreams
-			dynamic a {
-				name {$MQTT_SERVICE}
-				port {$MQTT_WS_PORT}
-				refresh 1s
-				dial_timeout 30s
-				versions ipv4 ipv6
-			}
+  @mqttWs {
+		header Connection *Upgrade*
+		header Upgrade    websocket
 
-			# configure load balancing settings
-			import lb_settings
+  	path /mqtt /mqtt/*
+  }
 
-			# configure passive health checks
-			import passive_health_checks
-
-			# sets the Host header to the header to the dynamic name and port options
-			header_up Host {upstream_hostport}
+	reverse_proxy @mqttWs {
+		# for private networking replicas are exposed as multiple dns results, use those dns results as the upstreams
+		dynamic a {
+			name {$MQTT_SERVICE}
+			port {$MQTT_WS_PORT}
+			refresh 1s
+			dial_timeout 30s
+			versions ipv4 ipv6
 		}
+
+		# configure load balancing settings
+		import lb_settings
+
+		# configure passive health checks
+		import passive_health_checks
+
+		# sets the Host header to the header to the dynamic name and port options
+		header_up Host {upstream_hostport}
 	}
 }
