@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+host=($(hostname --ip-address || echo '::1'))
+
+isIPv6() {
+  local colons="${1//[^:]}"
+  test "${#colons}" -gt 1
+}
+
+if isIPv6 "$host"; then
+  endpoint="[$host]:$ADMIN_PORT"
+else
+  endpoint="$host:$ADMIN_PORT"
+fi
+
+if emqx_ctl status && curl http://$endpoint/status; then
+	exit 0
+fi
+
+exit 1
