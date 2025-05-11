@@ -9,10 +9,13 @@ fi
 
 shopt -s nullglob
 
+# Print the container's hostname for debugging
+hostname
+
 ## Local IP address setting
 
 LOCAL_IPS=($(hostname --ip-address))
-LOCAL_IP=$(hostname -i | grep -oE '((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])\.){3}(25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])' | head -n 1)
+LOCAL_IP=$(hostname -i | grep -o -E '([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,7}:|([0-9a-f]{1,4}:){1,6}:[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,5}(:[0-9a-f]{1,4}){1,2}|([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,3}|([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,4}|([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5}|[0-9a-f]{1,4}:((:[0-9a-f]{1,4}){1,6})|:((:[0-9a-f]{1,4}){1,7}|:)')
 
 export EMQX_NAME="${EMQX_NAME:-emqx}"
 
@@ -44,8 +47,9 @@ if [[ -z "${EMQX_NODE_NAME:-}" ]] && [[ -z "${EMQX_NODE__NAME:-}" ]]; then
     export EMQX_NODE_NAME="$EMQX_NAME@$EMQX_HOST"
 fi
 
+
 # The default rpc port discovery 'stateless' is mostly for clusters
-# having static node names. So it's troulbe-free for multiple emqx nodes
+# having static node names. So it's trouble-free for multiple emqx nodes
 # running on the same host.
 # When start emqx in docker, it's mostly one emqx node in one container
 # i.e. use port 5369 (or per tcp_server_port | ssl_server_port config) for gen_rpc
